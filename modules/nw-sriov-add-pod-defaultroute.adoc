@@ -1,0 +1,52 @@
+// Module included in the following assemblies:
+//
+// * networking/multiple-networks/configuring-sr-iov.adoc
+
+[id="nw-sriov-add-pod-defaultroute_{context}"]
+= Overriding default route on SR-IOV additional network
+
+You can override default route on additional SR-IOV network by specifying `default-route` in pod annotation.
+
+.Prerequisites
+
+* Install the OpenShift Command-line Interface (CLI), commonly known as `oc`.
+
+.Procedure
+
+. Create the following SR-IOV pod spec, and then save the YAML in the `<name>-sriov-pod.yaml` file. Replace `<name>` with a name for this pod.
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sample-pod
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+	{
+		"name": "<name>", <1>
+		"default-route": ["192.168.0.1"] <2>
+	}
+]'
+spec:
+  containers:
+  - name: sample-container
+    image: <image>
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "infinity"]
+----
+<1> Replace `<name>` with the name of SR-IOV network attachment definition CR.
+<2> Specify the `default-route` addresses in the format of array.
+
+. Create the sample SR-IOV pod by running the following command:
++
+----
+$ oc create -f <filename> <1>
+----
+<1>  Replace `<filename>` with the name of the file you created in the previous step.
+
+. Optional: Confirm that `default-route` configuration is applied to pod by running the following command.
++
+----
+oc exec sample-pod -- ip route
+----
